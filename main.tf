@@ -1,12 +1,17 @@
 locals {
-  create_resource_group  = var.resource_group_name == null
-  create_storage_account = var.storage_account_name == null
+  create_resource_group    = var.resource_group_name == null
+  create_storage_account   = var.storage_account_name == null
+  default_location         = "Canada Central"
+  default_rgp_name         = "storage-rgp"
+  default_stg_acct_name    = "bryanstgacct20211018"
+  default_account_tier     = "Standard"
+  default_replication_tier = "LRS"
 }
 
 resource "azurerm_resource_group" "new_rgp" {
   count    = local.create_resource_group ? 1 : 0
-  name     = "storage-rgp"
-  location = "Canada Central"
+  name     = local.default_rgp_name
+  location = local.default_location
 }
 
 data "azurerm_resource_group" "existing_rgp" {
@@ -16,14 +21,14 @@ data "azurerm_resource_group" "existing_rgp" {
 
 resource "azurerm_storage_account" "storage_account" {
   count                    = local.create_storage_account ? 1 : 0
-  name                     = "bryanstgacct20211018"
-  resource_group_name      = local.create_resource_group ? resource.azurerm_resource_group.new_rgp.name : var.resource_group_name
-  location                 = local.create_resource_group ? resource.azurerm_resource_group.new_rgp.location : data.azurerm_resource_group_existing_rgp.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
+  name                     = local.default_stg_acct_name
+  resource_group_name      = local.create_resource_group ? local.default_rgp_name : var.resource_group_name
+  location                 = local.create_resource_group ? local.default_location : data.azurerm_resource_group.existing_rgp[0].location
+  account_tier             = local.default_account_tier
+  account_replication_type = local.default_replication_tier
 }
 
 resource "azurerm_storage_table" "table" {
   name                 = var.table_name
-  storage_account_name = local.create_storage_account ? resource_storage_account.storage_account.name : var.storage_account_name
+  storage_account_name = local.create_storage_account ? local.default_stg_acct_name : var.storage_account_name
 }

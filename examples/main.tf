@@ -17,6 +17,6 @@ module "test_storage_account" {
   source               = "../"
   resource_group_name  = "test-bbergen"
   storage_account_name = null
-  table_name           = "test_table01"
+  table_name           = "testtable01"
 }
 
